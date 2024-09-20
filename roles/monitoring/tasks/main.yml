@@ -1,0 +1,239 @@
+---
+# tasks file for monitoring
+- name: Create group monitoring
+  group:
+    name: monitoring
+    state: present
+  tags:
+   - prometheus
+   - grafana
+   - ssl
+
+- name: Create folder fo ssl
+  file:
+    path: "/etc/ssl/{{ monitoring_srv }}"
+    state: directory
+    owner: root
+    group: monitoring
+    mode: 0750
+  tags:
+    - ssl
+
+- name: Copy certificates
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/ssl/{{ monitoring_srv }}"
+    owner: root
+    group: monitoring
+    mode: 0750
+  with_items:
+    - "files/certificates/{{ monitoring_srv }}/fullchain.pem"
+    - "files/certificates/{{ monitoring_srv }}/privkey.pem"
+  tags:
+    - ssl
+
+- name: Create prometheus user
+  user:
+    name: prometheus
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+    groups: monitoring
+    append: true
+  tags: prometheus
+
+- name: Create derectories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  with_items:
+    - /etc/prometheus
+    - /var/lib/prometheus
+  tags: prometheus
+
+- name: Download prometheus
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: prometheus
+
+- name: Unarchive prometheus
+  unarchive:
+    src: "prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: prometheus
+
+- name: Copy binary files
+  copy:
+    src: "/home/vagrant/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+    dest: /usr/local/bin
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+    remote_src: true
+  with_items:
+    - prometheus
+    - promtool
+  tags: prometheus
+
+- name: Copy libraries
+  copy:
+    src: "/home/vagrant/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+    dest: /etc/prometheus
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+    remote_src: true
+  with_items:
+    - consoles
+    - console_libraries
+  tags: prometheus
+
+- name: Copy prometheus config files
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "/etc/prometheus/{{ item }}"
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  with_items:
+    - prometheus.yml
+    - web.yml
+  tags: prometheus
+
+- name: Copy prometheus recording rules file
+  copy:
+    src: files/mysql_exporter_recording_rules.yml
+    dest: /etc/prometheus/mysql_exporter_recording_rules.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  tags: prometheus
+
+- name: Create prometheus service
+  copy:
+    src: files/prometheus.service
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: prometheus
+
+- name: Start prometheus service
+  systemd:
+    name: prometheus
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  tags: prometheus
+
+- name: Copy grafana deb package
+  copy:
+    src: files/grafana-enterprise_11.2.0_amd64.deb
+    dest: /home/vagrant
+  tags: grafana
+
+- name: Install dependencies
+  apt:
+    name:
+      - libfontconfig1
+      - musl
+    state: present
+    update_cache: true
+  tags: grafana
+
+- name: Install grafana
+  apt:
+    deb: /home/vagrant/grafana-enterprise_11.2.0_amd64.deb
+  tags: grafana
+
+- name: Add grafana user to monitoring group
+  user:
+    name: grafana
+    system: true
+    state: present
+    groups: monitoring
+    append: true
+  tags: grafana
+
+- name: Copy grafana config
+  template:
+    src: templates/grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+    mode: 0640
+  notify: Restart grafana
+  tags: grafana
+
+- name: Copy grafana.db
+  copy:
+    src: files/grafana.db
+    dest: /var/lib/grafana/grafana.db
+    owner: grafana
+    group: grafana
+    mode: 0640
+  notify: Restart grafana
+  tags: grafana
+
+- name: Start grafana service
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: grafana
+
+- name: Create node exporter user
+  user:
+    name: node
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: node
+
+- name: Download node exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: node
+
+- name: Unarchive node exporter
+  unarchive:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: node
+
+- name: Copy binary file
+  copy:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+    dest: /usr/local/bin
+    owner: node
+    group: node
+    mode: 0755
+    remote_src: true
+  tags: node
+
+- name: Create node_exporter service
+  copy:
+    src: files/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: node
+
+- name: Start node exporter service
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: node

@@ -1,0 +1,246 @@
+---
+# tasks file for db
+- name: Install packages
+  apt:
+    name:
+      - mysql-server
+      - mysql-client
+      - python3-pymysql
+    state: present
+    update_cache: true
+  tags: mysql
+
+- name: Restart mysql service
+  systemd:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Copy mysqld config file
+  template:
+    src: templates/mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart mysql
+  tags: mysql
+
+- name: Restart mysql
+  meta: flush_handlers
+  tags: mysql
+
+- name: update mysql root password for all root accounts
+  mysql_user:
+    name: root
+    password: "{{ db_root_password }}"
+    check_implicit_admin: true
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags: mysql
+
+- name: Create database
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  tags: mysql
+
+- name: Create db user
+  mysql_user:
+    name: "{{ db_user }}"
+    host: "%"
+    password: "{{ db_password }}"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: present
+    priv: "{{ db_name }}.*:ALL"
+  tags: mysql
+
+- name: Create user for replication
+  mysql_user:
+    name: "{{ db_repl_user }}"
+    host: '%'
+    password: "{{ db_repl_password }}"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: present
+    priv: '*.*:REPLICATION SLAVE'
+  when: 'ansible_hostname == "db-master"'
+  tags:
+    - mysql
+    - replciation
+
+- name: Copy db dump to servers
+  copy:
+    src: files/wordpress.sql
+    dest: /home/vagrant/wordpress.sql
+  tags: replication
+
+- name: Loading wordpress dump
+  mysql_db:
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    name: wordpress
+    state: import
+    target: /home/vagrant/wordpress.sql
+  tags:
+    - mysql
+    - replication
+
+- name: Configure replication on slave
+  mysql_replication:
+    mode: changeprimary
+    primary_host: "{{ db_master_srv }}"
+    primary_port: 3306
+    primary_user: "{{ db_repl_user }}"
+    primary_password: "{{ db_repl_password }}"
+    primary_auto_position: true
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  when: 'ansible_hostname == "db-slave"'
+  tags:
+    - mysql
+    - replication
+
+- name: Start replication
+  mysql_replication:
+    mode: startreplica
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  when: 'ansible_hostname == "db-slave"'
+  tags:
+    - mysql
+    - replication
+
+- name: Create node exporter user
+  user:
+    name: node
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: node
+
+- name: Download node exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: node
+
+- name: Unarchive node exporter
+  unarchive:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: node
+
+- name: Copy node exporter binary file
+  copy:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+    dest: /usr/local/bin
+    owner: node
+    group: node
+    mode: 0755
+    remote_src: true
+  tags: node
+
+- name: Create node_exporter service
+  copy:
+    src: files/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: node
+
+- name: Start node exporter service
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: node
+
+- name: Create mysqld_exporter user
+  user:
+    name: mysqld_exporter
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: mysql_exporter
+
+- name: Download mysql exporter
+  get_url:
+    url: "https://github.com/prometheus/mysqld_exporter/releases/download/v{{ mysql_exporter_version }}/mysqld_exporter-{{ mysql_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: mysql_exporter
+
+- name: Unarchive mysql exporter
+  unarchive:
+    src: "mysqld_exporter-{{ mysql_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: mysql_exporter
+
+- name: Copy mysql exporter binary file
+  copy:
+    src: "mysqld_exporter-{{ mysql_exporter_version }}.linux-amd64/mysqld_exporter"
+    dest: /usr/local/bin
+    owner: mysqld_exporter
+    group: mysqld_exporter
+    mode: 0755
+    remote_src: true
+  notify: Restart mysqld_exporter
+  tags: mysql_exporter
+
+- name: Create folder for mysqld_exporter config
+  file:
+    path: /etc/mysqld_exporter
+    state: directory
+    owner: mysqld_exporter
+    group: mysqld_exporter
+    mode: 0755
+  tags: mysql_exporter
+
+- name: Copy mysqld_exporter my.cnf config
+  template:
+    src: templates/mysqld_exporter.my.cnf.j2
+    dest: /etc/mysqld_exporter/.my.cnf
+    owner: mysqld_exporter
+    group: mysqld_exporter
+    mode: 0600
+  notify: Restart mysqld_exporter
+  tags: mysql_exporter
+
+- name: Create mysqld_exporter service
+  template:
+    src: templates/mysqld_exporter.service.j2
+    dest: /etc/systemd/system/mysqld_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart mysqld_exporter
+  tags: mysql_exporter
+
+- name: Create db user for mysqld_exporter
+  mysql_user:
+    name: "{{ db_mysqld_exporter_user }}"
+    host: 'localhost'
+    password: "{{ db_mysqld_exporter_password }}"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: present
+    priv: '*.*:PROCESS,REPLICATION CLIENT,SELECT'
+  tags: mysql_exporter
+
+- name: Start node exporter service
+  systemd:
+    name: mysqld_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: mysql_exporter

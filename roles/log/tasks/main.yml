@@ -1,0 +1,23 @@
+---
+# tasks file for log
+- name: Copy deb files to server
+  copy:
+    src: "files/{{item}}"
+    dest: /home/vagrant
+  with_items:
+    - "elasticsearch-{{ elk_version }}-amd64.deb"
+    - "kibana-{{ elk_version }}-amd64.deb"
+    - "logstash-{{ elk_version }}-amd64.deb"
+  tags: elk
+
+- name: Install ELK
+  apt:
+    deb: "/home/vagrant/{{ item }}"
+  with_items:
+    - "elasticsearch-{{ elk_version }}-amd64.deb"
+    - "kibana-{{ elk_version }}-amd64.deb"
+    - "logstash-{{ elk_version }}-amd64.deb"
+  tags: elk
+
+- name: Install node exporter
+  include_tasks: node_exporter.yml

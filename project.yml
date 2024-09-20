@@ -1,0 +1,36 @@
+---
+- hosts: db
+  become: true
+  gather_facts: true
+  roles:
+    - role: db
+      tags: db
+
+- hosts: frontend
+  become: true
+  gather_facts: false
+  roles:
+    - role: frontend
+      tags: frontend
+
+- hosts: backend
+  become: true
+  gather_facts: true
+  roles:
+    - role: backend
+      tags: backend
+
+- hosts: monitoring
+  become: true
+  gather_facts: false
+  roles:
+    - role: monitoring
+      tags: monitoring
+
+- hosts: log
+  become: true
+  gather_facts: false
+  roles:
+    - role: log
+      tags: log
+...

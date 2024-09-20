@@ -1,0 +1,17 @@
+<IfModule mod_ssl.c>
+        <VirtualHost *:443>
+                ServerName {{ ansible_hostname }}.{{ domain_name }}
+                DocumentRoot /var/www/html
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+                SSLEngine on
+                SSLCertificateFile      /etc/apache2/ssl/{{ ansible_hostname }}.{{ domain_name }}/fullchain.pem
+                SSLCertificateKeyFile /etc/apache2/ssl/{{ ansible_hostname }}.{{ domain_name }}/privkey.pem
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +StdEnvVars
+                </Directory>
+        </VirtualHost>
+</IfModule>

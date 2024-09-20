@@ -1,0 +1,33 @@
+---
+# handlers file for frontend
+- name: Restart nginx
+  debug:
+    msg: "Checking nginx config"
+  changed_when: true
+  notify:
+    - Check nginx configuration
+    - Restart nginx - after config check
+
+- name: Reload nginx
+  debug:
+    msg: "Checking nginx config"
+  changed_when: true
+  notify:
+    - Check nginx configuration
+    - Reload nginx - after config check
+
+- name: Check nginx configuration
+  command: "nginx -t"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: false
+
+- name: Restart nginx - after config check
+  systemd:
+    name: nginx
+    state: restarted
+
+- name: Reload nginx - after config check
+  systemd:
+    name: nginx
+    state: reloaded

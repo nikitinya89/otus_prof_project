@@ -1,0 +1,13 @@
+[Unit]
+Description=Node Exporter
+After=network.target
+[Service]
+User=mysqld_exporter
+Group=mysqld_exporter
+Type=simple
+Environment="DATA_SOURCE_NAME={{ db_mysqld_exporter_user }}:{{ db_mysqld_exporter_password }}@tcp(localhost:3306)/"
+ExecStart=/usr/local/bin/mysqld_exporter \
+--config.my-cnf /etc/mysqld_exporter/.my.cnf
+Restart=always
+[Install]
+WantedBy=multi-user.target

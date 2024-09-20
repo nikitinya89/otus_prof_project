@@ -1,0 +1,33 @@
+---
+# handlers file for backend
+- name: Restart apache
+  debug:
+    msg: "Checking apache config"
+  changed_when: true
+  notify:
+    - Check apache configuration
+    - Restart apache - after config check
+
+- name: Reload apache
+  debug:
+    msg: "Checking apache config"
+  changed_when: true
+  notify:
+    - Check apache configuration
+    - Reload apache - after config check
+
+- name: Check apache configuration
+  command: "apachectl configtest"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: false
+
+- name: Restart apache - after config check
+  systemd:
+    name: apache2
+    state: restarted
+
+- name: Reload apache - after config check
+  systemd:
+    name: apache2
+    state: reloaded

@@ -1,0 +1,192 @@
+---
+# tasks file for backend
+- name: Install apache
+  apt:
+    name:
+      - apache2
+      - apache2-utils
+      - php8.1
+      - php8.1-mysql
+      - libapache2-mod-php8.1
+      - php8.1-cli
+      - php8.1-cgi
+      - php8.1-gd
+    state: present
+    update_cache: true
+  tags: apache
+
+- name: Restart apache service
+  systemd:
+    name: apache2
+    state: restarted
+    enabled: true
+  tags: apache
+
+- name: Create folder for ssl
+  file:
+    path: "/etc/apache2/ssl/{{ ansible_hostname }}.{{ domain_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - apache
+    - ssl
+
+- name: Copy certificates
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/apache2/ssl/{{ ansible_hostname }}.{{ domain_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "files/certificates/{{ ansible_hostname }}.{{ domain_name }}/fullchain.pem"
+    - "files/certificates/{{ ansible_hostname }}.{{ domain_name }}/privkey.pem"
+  tags:
+    - apache
+    - ssl
+
+- name: Remove default apache conf
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/apache2/sites-available/000-default.conf
+    - /etc/apache2/sites-available/default-ssl.conf
+    - /etc/apache2/sites-enabled/000-default.conf
+  notify: Reload apache
+  tags: apache
+
+- name: Copy apache config
+  template:
+    src: templates/backend.conf.j2
+    dest: /etc/apache2/sites-available/backend.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Reload apache
+  tags: apache
+
+- name: Enable site
+  file:
+    src: /etc/apache2/sites-available/backend.conf
+    dest: /etc/apache2/sites-enabled/backend.conf
+    owner: root
+    group: root
+    state: link
+  notify: Reload apache
+  tags: apache
+
+- name: Enable ssl
+  file:
+    src: "/etc/apache2/mods-available/{{ item }}"
+    dest: "/etc/apache2/mods-enabled/{{ item }}"
+    owner: root
+    group: root
+    state: link
+  with_items:
+    - ssl.load
+    - ssl.conf
+    - setenvif.conf
+    - setenvif.load
+    - mime.conf
+    - mime.load
+    - socache_shmcb.load
+  notify: Reload apache
+  tags: apache
+
+- name: Remove default index.html
+  file:
+    path: /var/www/html/index.html
+    state: absent
+  notify: Reload apache
+  tags: apache
+
+- name: Reload apache
+  meta: flush_handlers
+  tags: apache
+
+- name: Download wordpress
+  get_url:
+    url: http://wordpress.org/latest.tar.gz
+    dest: /home/vagrant/latest.tar.gz
+  tags: wordpress
+
+- name: Unarchive wordpress
+  unarchive:
+    src: /home/vagrant/latest.tar.gz
+    dest: /var/www/html/
+    remote_src: true
+    extra_opts: [--strip-components=1]
+  notify: Reload apache
+  tags: wordpress
+
+- name: Copy wordpress config
+  template:
+    src: templates/wp-config.php.j2
+    dest: /var/www/html/wp-config.php
+    owner: www-data
+    group: www-data
+    mode: 0755
+  notify: Reload apache
+  tags: wordpress
+
+- name: Change www owner
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+    recurse: true
+  tags: wordpress
+
+- name: Create node exporter user
+  user:
+    name: node
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: node
+
+- name: Download node exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: node
+
+- name: Unarchive node exporter
+  unarchive:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: node
+
+- name: Copy binary file
+  copy:
+    src: "node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+    dest: /usr/local/bin
+    owner: node
+    group: node
+    mode: 0755
+    remote_src: true
+  tags: node
+
+- name: Create node_exporter service
+  copy:
+    src: files/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: node
+
+- name: Start node exporter service
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: node

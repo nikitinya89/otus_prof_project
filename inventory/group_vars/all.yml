@@ -1,0 +1,28 @@
+domain_name: ynikitin.ru
+public_name: otus.{{ domain_name }}
+frontend_srv: frontend.{{ domain_name }}
+backend_1_srv: backend-1.{{ domain_name }}
+backend_2_srv: backend-2.{{ domain_name }}
+db_master_srv: db-master.{{ domain_name }}
+db_slave_srv: db-slave.{{ domain_name }}
+monitoring_srv: monitoring.{{ domain_name }}
+log_srv: log.{{ domain_name }}
+
+db_name: wordpress
+db_user: wordpress
+db_password: Qwerty123
+db_host: "{{ db_master_srv }}"
+db_root_password: P@$$w0rd
+db_repl_user: repl
+db_repl_password: Repl1c@
+db_mysqld_exporter_user: exporter
+db_mysqld_exporter_password: Exp0rteR
+
+grafana_user: admin
+grafana_password: Qwerty123
+
+prometheus_version: 2.54.1
+node_exporter_version: 1.8.2
+mysql_exporter_version: 0.15.1
+nginx_exporter_version: 1.3.0
+elk_version: 8.15.1
