@@ -1,0 +1,40 @@
+---
+- name: Download nginx exporter
+  get_url:
+    url: "https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v{{ nginx_exporter_version }}/nginx-prometheus-exporter_{{ nginx_exporter_version }}_linux_amd64.tar.gz"
+    dest: /home/vagrant
+  tags: nginx_exporter
+
+- name: Unarchive nginx exporter
+  unarchive:
+    src: "nginx-prometheus-exporter_{{ nginx_exporter_version }}_linux_amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: nginx_exporter
+
+- name: Copy nginx exporter binary file
+  copy:
+    src: /home/vagrant/nginx-prometheus-exporter
+    dest: /usr/local/bin
+    owner: nginx_exporter
+    group: nginx_exporter
+    mode: 0755
+    remote_src: true
+  tags: nginx_exporter
+
+- name: Create nginx_exporter service
+  copy:
+    src: files/nginx_exporter.service
+    dest: /etc/systemd/system/nginx_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: nginx_exporter
+
+- name: Start node exporter service
+  systemd:
+    name: nginx_exporter
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: nginx_exporter
