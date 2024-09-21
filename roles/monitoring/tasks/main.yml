@@ -68,7 +68,7 @@
     remote_src: true
   tags: prometheus
 
-- name: Copy binary files
+- name: Copy prometheus binary files
   copy:
     src: "/home/vagrant/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
     dest: /usr/local/bin
@@ -81,7 +81,7 @@
     - promtool
   tags: prometheus
 
-- name: Copy libraries
+- name: Copy prometheus libraries
   copy:
     src: "/home/vagrant/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
     dest: /etc/prometheus
@@ -189,5 +189,83 @@
     daemon_reload: true
   tags: grafana
 
+- name: Create alertmanager user
+  user:
+    name: alertmanager
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+    groups: monitoring
+    append: true
+  tags: alertmanager
+
+- name: Create alertmanager derectories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: alertmanager
+    group: alertmanager
+    mode: 0755
+  with_items:
+    - /etc/alertmanager
+    - /var/lib/prometheus/alertmanager
+  tags: alertmanager
+
+- name: Download alertmanager
+  get_url:
+    url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+  tags: alertmanager
+
+- name: Unarchive alertmanager
+  unarchive:
+    src: "alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    dest: /home/vagrant
+    remote_src: true
+  tags: alertmanager
+
+- name: Copy alertmanager binary files
+  copy:
+    src: "/home/vagrant/alertmanager-{{ alertmanager_version }}.linux-amd64/{{ item }}"
+    dest: /usr/local/bin
+    owner: alertmanager
+    group: alertmanager
+    mode: 0755
+    remote_src: true
+  with_items:
+    - alertmanager
+    - amtool
+  tags: alertmanager
+
+- name: Copy alertmanager config files
+  copy:
+    src: "/home/vagrant/alertmanager-{{ alertmanager_version }}.linux-amd64/alertmanager.yml"
+    dest: "/etc/alertmanager/alertmanager.yml"
+    owner: alertmanager
+    group: alertmanager
+    mode: 0755
+    remote_src: true
+  tags: prometheus
+
+- name: Create alertmanager service
+  copy:
+    src: files/alertmanager.service
+    dest: /etc/systemd/system/alertmanager.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: alertmanager
+
+- name: Start alertmanager service
+  systemd:
+    name: alertmanager
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  tags: alertmanager
+
 - name: Install node exporter
   include_tasks: node_exporter.yml
+
+
