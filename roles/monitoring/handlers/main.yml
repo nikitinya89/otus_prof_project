@@ -9,3 +9,8 @@
   systemd:
     name: grafana-server
     state: restarted
+
+- name: Restart alertmanager
+  systemd:
+    name: alertmanager
+    state: restarted

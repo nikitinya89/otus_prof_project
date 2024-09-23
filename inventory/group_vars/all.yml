@@ -22,3 +22,7 @@ node_exporter_version: 1.8.2
 mysql_exporter_version: 0.15.1
 nginx_exporter_version: 1.3.0
 elk_version: 8.15.1
+
+
+alert_email: otus.professional.project@yandex.ru
+alert_email_smtp: "smtp.yandex.ru:587"

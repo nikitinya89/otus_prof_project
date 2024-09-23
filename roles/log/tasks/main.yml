@@ -79,4 +79,4 @@
   tags: elk
 
 - name: Install node exporter
-  include_tasks: node_exporter.yml
+  import_tasks: node_exporter.yml

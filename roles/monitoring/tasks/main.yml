@@ -236,17 +236,18 @@
   with_items:
     - alertmanager
     - amtool
+  notify: Restart alertmanager
   tags: alertmanager
 
 - name: Copy alertmanager config files
-  copy:
-    src: "/home/vagrant/alertmanager-{{ alertmanager_version }}.linux-amd64/alertmanager.yml"
-    dest: "/etc/alertmanager/alertmanager.yml"
+  template:
+    src: templates/alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
     owner: alertmanager
     group: alertmanager
     mode: 0755
-    remote_src: true
-  tags: prometheus
+  notify: Restart alertmanager
+  tags: alertmanager
 
 - name: Create alertmanager service
   copy:
@@ -255,6 +256,11 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart alertmanager
+  tags: alertmanager
+
+- name: Restart alertmanager
+  meta: flush_handlers
   tags: alertmanager
 
 - name: Start alertmanager service
@@ -266,6 +272,4 @@
   tags: alertmanager
 
 - name: Install node exporter
-  include_tasks: node_exporter.yml
-
-
+  import_tasks: node_exporter.yml
