@@ -78,5 +78,8 @@
     enabled: true
   tags: elk
 
-- name: Install node exporter
+- name: Configure node exporter
   import_tasks: node_exporter.yml
+
+- name: Configure iptables
+  import_tasks: iptables.yml

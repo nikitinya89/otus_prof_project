@@ -1,0 +1,44 @@
+- name: Download wordpress
+  get_url:
+    url: http://wordpress.org/latest.tar.gz
+    dest: /home/vagrant/latest.tar.gz
+  tags: wordpress
+
+- name: Unarchive wordpress
+  unarchive:
+    src: /home/vagrant/latest.tar.gz
+    dest: /var/www/html/
+    remote_src: true
+    extra_opts: [--strip-components=1]
+  notify: Reload apache
+  tags: wordpress
+
+- name: Copy wordpress config
+  template:
+    src: templates/wp-config.php.j2
+    dest: /var/www/html/wp-config.php
+    owner: www-data
+    group: www-data
+    mode: 0755
+  notify: Reload apache
+  tags: wordpress
+
+- name: Copy functions.php
+  copy:
+    src: files/functions.php
+    dest: /var/www/html/wp-content/themes/twentytwentyfour/functions.php
+    owner: www-data
+    group: www-data
+    mode: 0755
+  notify: Reload apache
+  tags: wordpress
+
+- name: Change www owner
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+    recurse: true
+  tags: wordpress

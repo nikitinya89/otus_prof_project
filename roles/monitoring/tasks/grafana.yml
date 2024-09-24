@@ -1,0 +1,60 @@
+- name: Copy grafana deb package
+  copy:
+    src: files/grafana-enterprise_11.2.0_amd64.deb
+    dest: /home/vagrant
+  tags: grafana
+
+- name: Install dependencies
+  apt:
+    name:
+      - libfontconfig1
+      - musl
+    state: present
+    update_cache: true
+  tags: grafana
+
+- name: Install grafana
+  apt:
+    deb: /home/vagrant/grafana-enterprise_11.2.0_amd64.deb
+  tags: grafana
+
+- name: Add grafana user to monitoring group
+  user:
+    name: grafana
+    system: true
+    state: present
+    groups: monitoring
+    append: true
+  tags: grafana
+
+- name: Copy grafana config
+  template:
+    src: templates/grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+    mode: 0640
+  notify: Restart grafana
+  tags: grafana
+
+- name: Copy grafana.db
+  copy:
+    src: files/grafana.db
+    dest: /var/lib/grafana/grafana.db
+    owner: grafana
+    group: grafana
+    mode: 0640
+  notify: Restart grafana
+  tags: grafana
+
+- name: Restart grafana
+  meta: flush_handlers
+  tags: grafana
+
+- name: Start grafana service
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags: grafana

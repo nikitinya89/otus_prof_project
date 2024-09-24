@@ -125,8 +125,11 @@
     - mysql
     - replication
 
-- name: Install node exporter
-  include_tasks: node_exporter.yml
+- name: Configure node exporter
+  import_tasks: node_exporter.yml
 
-- name: Install mysqld exporter
-  include_tasks: mysqld_exporter.yml
+- name: Configure mysqld exporter
+  import_tasks: mysqld_exporter.yml
+
+- name: Configure iptables
+  import_tasks: iptables.yml

@@ -1,0 +1,90 @@
+- name: Allow traffic through loopback interface
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+  tags: iptables
+
+- name: Drop invalid  connections
+  iptables:
+    chain: INPUT
+    ctstate: INVALID
+    jump: DROP
+  tags: iptables
+
+- name: Allow new packets on SSH for Vagrant Host
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    in_interface: enp0s3
+    destination_port: 22
+    ctstate: NEW
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow new packets on SSH
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    in_interface: enp0s8
+    destination_port: 22
+    ctstate: NEW
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow node exporter traffic from prometheus server
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['monitoring'].ansible_host }}"
+    protocol: tcp
+    destination_port: 9100
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow traffic to grafana
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    protocol: tcp
+    destination_port: 3000
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow traffic to prometheus
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    protocol: tcp
+    destination_port: 9090
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow traffic to alertmanager
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    protocol: tcp
+    destination_ports: "9093:9094"
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow ICMP
+  iptables:
+    chain: INPUT
+    protocol: icmp
+    jump: ACCEPT
+  tags: iptables
+
+- name: Set the policy for the INPUT chain to DROP
+  iptables:
+    chain: INPUT
+    policy: DROP
+  tags: iptables

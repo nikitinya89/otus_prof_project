@@ -103,8 +103,11 @@
   meta: flush_handlers
   tags: nginx
 
-- name: Install node exporter
-  include_tasks: node_exporter.yml
+- name: Configure node exporter
+  import_tasks: node_exporter.yml
 
-- name: Install nginx exporter
-  include_tasks: nginx_exporter.yml
+- name: Configure nginx exporter
+  import_tasks: nginx_exporter.yml
+
+- name: Configure iptables
+  import_tasks: iptables.yml

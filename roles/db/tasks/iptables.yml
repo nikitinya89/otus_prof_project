@@ -1,0 +1,115 @@
+- name: Allow traffic through loopback interface
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+  tags: iptables
+
+- name: Drop invalid  connections
+  iptables:
+    chain: INPUT
+    ctstate: INVALID
+    jump: DROP
+  tags: iptables
+
+- name: Allow new packets on SSH for Vagrant Host
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    in_interface: enp0s3
+    destination_port: 22
+    ctstate: NEW
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow new packets on SSH
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    in_interface: enp0s8
+    destination_port: 22
+    ctstate: NEW
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow mysql to Backend-1
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['backend_1'].ansible_host }}"
+    protocol: tcp
+    destination_port: 3306
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow mysql to Backend-2
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['backend_2'].ansible_host }}"
+    protocol: tcp
+    destination_port: 3306
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow mysql to db-slave
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['db_slave'].ansible_host }}"
+    protocol: tcp
+    destination_port: 3306
+    jump: ACCEPT
+  when: 'ansible_hostname == "db-master"'
+  tags: iptables
+
+- name: Allow mysql to db-master
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['db_master'].ansible_host }}"
+    protocol: tcp
+    destination_port: 3306
+    jump: ACCEPT
+  when: 'ansible_hostname == "db-slave"'
+  tags: iptables
+
+- name: Allow node exporter traffic to prometheus server
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['monitoring'].ansible_host }}"
+    protocol: tcp
+    destination_port: 9100
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow mysqld exporter traffic to prometheus server
+  iptables:
+    chain: INPUT
+    in_interface: enp0s8
+    source: "{{ hostvars['monitoring'].ansible_host }}"
+    protocol: tcp
+    destination_port: 9104
+    jump: ACCEPT
+  tags: iptables
+
+- name: Allow ICMP
+  iptables:
+    chain: INPUT
+    protocol: icmp
+    jump: ACCEPT
+  tags: iptables
+
+- name: Set the policy for the INPUT chain to DROP
+  iptables:
+    chain: INPUT
+    policy: DROP
+  tags: iptables

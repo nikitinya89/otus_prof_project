@@ -22,7 +22,7 @@
 
 - hosts: monitoring
   become: true
-  gather_facts: false
+  gather_facts: true
   vars_files: inventory/group_vars/all_vault.yml
   roles:
     - role: monitoring
