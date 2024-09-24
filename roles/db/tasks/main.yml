@@ -90,6 +90,16 @@
     - mysql
     - replication
 
+- name: Stop replication
+  mysql_replication:
+    mode: stopreplica
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  when: 'ansible_hostname == "db-slave"'
+  tags:
+    - mysql
+    - replication
+
 - name: Configure replication on slave
   mysql_replication:
     mode: changeprimary

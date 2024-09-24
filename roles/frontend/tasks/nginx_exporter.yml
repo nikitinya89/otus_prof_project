@@ -1,4 +1,13 @@
 ---
+- name: Create node exporter user
+  user:
+    name: nginx_exporter
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  tags: nginx_exporter
+
 - name: Download nginx exporter
   get_url:
     url: "https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v{{ nginx_exporter_version }}/nginx-prometheus-exporter_{{ nginx_exporter_version }}_linux_amd64.tar.gz"

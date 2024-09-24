@@ -132,6 +132,16 @@
   notify: Reload apache
   tags: wordpress
 
+- name: Copy functions.php
+  copy:
+    src: files/functions.php
+    dest: /var/www/html/wp-content/themes/twentytwentyfour/functions.php
+    owner: www-data
+    group: www-data
+    mode: 0755
+  notify: Reload apache
+  tags: wordpress
+
 - name: Change www owner
   file:
     path: /var/www/html
