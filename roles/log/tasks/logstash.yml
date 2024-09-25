@@ -1,0 +1,46 @@
+- name: Install logstash
+  apt:
+    deb: "/home/vagrant/logstash-{{ elk_version }}-amd64.deb"
+  tags:
+    - elk
+    - logstash
+
+- name: Copy logstash config
+  copy:
+    src: files/logstash.yml
+    dest: /etc/logstash/logstash.yml
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart logstash
+  tags:
+    - elk
+    - logstash
+
+- name: Copy logstash nginx conf file
+  copy:
+    src: files/logstash-nginx-es.conf
+    dest: /etc/logstash/conf.d/logstash-nginx-es.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart logstash
+  tags:
+    - elk
+    - logstash
+
+- name: Restart logstash
+  meta: flush_handlers
+  tags:
+    - elk
+    - logstash
+
+- name: Start logstash service
+  systemd:
+    name: logstash
+    state: started
+    enabled: true
+    daemon_reload: true
+  tags:
+    - elk
+    - logstash

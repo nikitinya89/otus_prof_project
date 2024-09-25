@@ -5,7 +5,11 @@
     name: default-jdk
     state: present
     update_cache: true
-  tags: elk
+  tags:
+    - elk
+    - elasticsearch
+    - kibana
+    - logstash
 
 - name: Copy deb files to server
   copy:
@@ -15,68 +19,20 @@
     - "elasticsearch-{{ elk_version }}-amd64.deb"
     - "kibana-{{ elk_version }}-amd64.deb"
     - "logstash-{{ elk_version }}-amd64.deb"
-  tags: elk
+  tags:
+    - elk
+    - elasticsearch
+    - kibana
+    - logstash
 
-- name: Install ELK
-  apt:
-    deb: "/home/vagrant/{{ item }}"
-  with_items:
-    - "elasticsearch-{{ elk_version }}-amd64.deb"
-    - "kibana-{{ elk_version }}-amd64.deb"
-    - "logstash-{{ elk_version }}-amd64.deb"
-  tags: elk
+- name: Configure elasticsearch
+  import_tasks: elasticsearch.yml
 
-- name: Copy jvm.options
-  copy:
-    src: files/jvm.options
-    dest: /etc/elasticsearch/jvm.options.d/jvm.options
-    owner: root
-    group: elasticsearch
-    mode: 0660
-  notify: Restart elasticsearch
-  tags: elk
+- name: Configure kibana
+  import_tasks: kibana.yml
 
-- name: Copy elasticsearch config
-  copy:
-    src: files/elasticsearch.yml
-    dest: /etc/elasticsearch/elasticsearch.yml
-    owner: root
-    group: elasticsearch
-    mode: 0660
-  notify: Restart elasticsearch
-  tags: elk
-
-- name: Restart elasticsearch
-  meta: flush_handlers
-  tags: elk
-
-- name: Start elasticsearch service
-  systemd:
-    name: elasticsearch
-    state: started
-    enabled: true
-  tags: elk
-
-- name: Copy kibana config
-  copy:
-    src: files/kibana.yml
-    dest: /etc/kibana/kibana.yml
-    owner: root
-    group: kibana
-    mode: 0660
-  notify: Restart kibana
-  tags: elk
-
-- name: Restart kibana
-  meta: flush_handlers
-  tags: elk
-
-- name: Start kibana service
-  systemd:
-    name: kibana
-    state: started
-    enabled: true
-  tags: elk
+- name: Configure logstash
+  import_tasks: logstash.yml
 
 - name: Configure node exporter
   import_tasks: node_exporter.yml

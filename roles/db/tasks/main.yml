@@ -75,20 +75,9 @@
 
 - name: Copy db dump to servers
   copy:
-    src: files/wordpress.sql
-    dest: /home/vagrant/wordpress.sql
+    src: files/master.sql
+    dest: /home/vagrant/master.sql
   tags: replication
-
-- name: Loading wordpress dump
-  mysql_db:
-    login_user: root
-    login_password: "{{ db_root_password }}"
-    name: wordpress
-    state: import
-    target: /home/vagrant/wordpress.sql
-  tags:
-    - mysql
-    - replication
 
 - name: Stop replication
   mysql_replication:
@@ -115,6 +104,17 @@
     - mysql
     - replication
 
+- name: Loading mysql dump
+  mysql_db:
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    name: master
+    state: import
+    target: /home/vagrant/master.sql
+  tags:
+    - mysql
+    - replication
+
 - name: Start replication
   mysql_replication:
     mode: startreplica
@@ -130,6 +130,9 @@
 
 - name: Configure mysqld exporter
   import_tasks: mysqld_exporter.yml
+
+- name: Configure filebeat
+  import_tasks: filebeat.yml
 
 - name: Configure iptables
   import_tasks: iptables.yml

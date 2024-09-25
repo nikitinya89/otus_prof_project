@@ -9,3 +9,8 @@
   systemd:
     name: mysqld_exporter
     state: restarted
+
+- name: Restart filebeat
+  systemd:
+    name: filebeat
+    state: restarted

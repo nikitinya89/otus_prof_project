@@ -1,0 +1,45 @@
+- name: Install elasticsearch
+  apt:
+    deb: "/home/vagrant/elasticsearch-{{ elk_version }}-amd64.deb"
+  tags:
+    - elk
+    - elasticsearch
+
+- name: Copy jvm.options
+  copy:
+    src: files/jvm.options
+    dest: /etc/elasticsearch/jvm.options.d/jvm.options
+    owner: root
+    group: elasticsearch
+    mode: 0660
+  notify: Restart elasticsearch
+  tags:
+    - elk
+    - elasticsearch
+
+- name: Copy elasticsearch config
+  template:
+    src: templates/elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: root
+    group: elasticsearch
+    mode: 0660
+  notify: Restart elasticsearch
+  tags:
+    - elk
+    - elasticsearch
+
+- name: Restart elasticsearch
+  meta: flush_handlers
+  tags:
+    - elk
+    - elasticsearch
+
+- name: Start elasticsearch service
+  systemd:
+    name: elasticsearch
+    state: started
+    enabled: true
+  tags:
+    - elk
+    - elasticsearch

@@ -31,3 +31,8 @@
   systemd:
     name: nginx
     state: reloaded
+
+- name: Restart filebeat
+  systemd:
+    name: filebeat
+    state: restarted

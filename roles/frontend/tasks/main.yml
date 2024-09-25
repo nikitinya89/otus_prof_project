@@ -109,5 +109,8 @@
 - name: Configure nginx exporter
   import_tasks: nginx_exporter.yml
 
+- name: Configure filebeat
+  import_tasks: filebeat.yml
+
 - name: Configure iptables
   import_tasks: iptables.yml

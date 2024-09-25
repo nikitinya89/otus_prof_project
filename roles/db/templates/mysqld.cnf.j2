@@ -59,12 +59,13 @@ myisam-recover-options  = BACKUP
 #
 # Error log - should be very few entries.
 #
-log_error = /var/log/mysql/error.log
+#log_error = /var/log/mysql/error.log
 #
 # Here you can see queries with especially long duration
-# slow_query_log                = 1
-# slow_query_log_file   = /var/log/mysql/mysql-slow.log
-# long_query_time = 2
+log_queries_not_using_indexes = 1
+slow_query_log        = on
+slow_query_log_file   = /var/log/mysql/mysql-slow-query.log
+long_query_time = 0
 # log-queries-not-using-indexes
 #
 # The following can be used as easy to replay backup logs or for replication.
@@ -86,3 +87,6 @@ binlog-format = "MIXED"
 log-slave-updates = On
 gtid-mode = On
 enforce-gtid-consistency = On
+
+[mysqld_safe]
+log-error=/var/log/mysql/mysqld.log

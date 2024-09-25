@@ -1,0 +1,48 @@
+- name: Copy filebeat deb package
+  copy:
+    src: "files/filebeat-{{ elk_version }}-amd64.deb"
+    dest: /home/vagrant
+  tags: filebeat
+
+- name: Install filebeat
+  apt:
+    deb: "/home/vagrant/filebeat-{{ elk_version }}-amd64.deb"
+  tags: filebeat
+
+- name: Copy filebeat config
+  template:
+    src: templates/filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: 0600
+  notify: Restart filebeat
+  tags: filebeat
+
+- name: Enable mysql module
+  shell: filebeat modules enable mysql
+  args:
+    creates: /etc/filebeat/modules.d/mysql.yml
+  notify: Restart filebeat
+  tags: filebeat
+
+- name: Copy filebeat nginx module config
+  copy:
+    src: files/mysql.yml
+    dest: /etc/filebeat/modules.d/mysql.yml
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart filebeat
+  tags: filebeat
+
+- name: Restart filebeat
+  meta: flush_handlers
+  tags: filebeat
+
+- name: Start filebeat service
+  systemd:
+    name: filebeat
+    state: started
+    enabled: true
+  tags: filebeat

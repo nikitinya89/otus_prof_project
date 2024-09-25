@@ -1,0 +1,33 @@
+- name: Install kibana
+  apt:
+    deb: "/home/vagrant/kibana-{{ elk_version }}-amd64.deb"
+  tags:
+    - elk
+    - kibana
+
+- name: Copy kibana config
+  copy:
+    src: files/kibana.yml
+    dest: /etc/kibana/kibana.yml
+    owner: root
+    group: kibana
+    mode: 0660
+  notify: Restart kibana
+  tags:
+    - elk
+    - kibana
+
+- name: Restart kibana
+  meta: flush_handlers
+  tags:
+    - elk
+    - kibana
+
+- name: Start kibana service
+  systemd:
+    name: kibana
+    state: started
+    enabled: true
+  tags:
+    - elk
+    - kibana
