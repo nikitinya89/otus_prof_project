@@ -40,24 +40,54 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
   tags: mysql
 
-- name: Create database
-  mysql_db:
-    name: "{{ db_name }}"
-    state: present
-    login_user: root
-    login_password: "{{ db_root_password }}"
-  tags: mysql
+#- name: Create database
+#  mysql_db:
+#    name: "{{ db_name }}"
+#    state: present
+#    login_user: root
+#    login_password: "{{ db_root_password }}"
+#  tags: mysql
 
-- name: Create db user
-  mysql_user:
-    name: "{{ db_user }}"
-    host: "%"
-    password: "{{ db_password }}"
+#- name: Create db user
+#  mysql_user:
+#    name: "{{ db_user }}"
+#    host: "%"
+#    password: "{{ db_password }}"
+#    login_user: root
+#    login_password: "{{ db_root_password }}"
+#    state: present
+#    priv: "{{ db_name }}.*:ALL"
+#  when: 'ansible_hostname == "db-master"'
+#  tags: mysql
+
+- name: Copy db dump to servers
+  copy:
+    src: files/db_new.sql
+    dest: /home/vagrant/db.sql
+#  when: 'ansible_hostname == "db-master"'
+  tags:
+    - mysql
+    - replication
+    - test
+
+- name: Loading mysql dump
+  mysql_db:
     login_user: root
     login_password: "{{ db_root_password }}"
-    state: present
-    priv: "{{ db_name }}.*:ALL"
-  tags: mysql
+    name: all
+    state: import
+    target: /home/vagrant/db.sql
+#  when: 'ansible_hostname == "db-master"'
+  tags:
+    - mysql
+    - replication
+    - test
+
+#- name: 
+#  shell: mysqldump --all-databases --add-drop-table --create-options --disable-keys \
+#                   --extended-insert --single-transaction --quick --events --routines \
+#                   --set-gtid-purged=OFF --triggers --skip-lock-tables --flush-privileges \
+#                   -u root -p'P@$$w0rd' > /home/vagrant/db.sql
 
 - name: Create user for replication
   mysql_user:
@@ -71,13 +101,7 @@
   when: 'ansible_hostname == "db-master"'
   tags:
     - mysql
-    - replciation
-
-- name: Copy db dump to servers
-  copy:
-    src: files/master.sql
-    dest: /home/vagrant/master.sql
-  tags: replication
+    - replication
 
 - name: Stop replication
   mysql_replication:
@@ -104,16 +128,17 @@
     - mysql
     - replication
 
-- name: Loading mysql dump
-  mysql_db:
-    login_user: root
-    login_password: "{{ db_root_password }}"
-    name: master
-    state: import
-    target: /home/vagrant/master.sql
-  tags:
-    - mysql
-    - replication
+#- name: Loading mysql dump
+#  mysql_db:
+#    login_user: root
+#    login_password: "{{ db_root_password }}"
+#    name: all
+#    state: import
+#    target: /home/vagrant/db.sql
+#  when: 'ansible_hostname == "db-slave"'
+#  tags:
+#    - mysql
+#    - replication
 
 - name: Start replication
   mysql_replication:

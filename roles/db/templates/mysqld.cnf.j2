@@ -81,12 +81,18 @@ log_bin                       = /var/log/mysql/mysql-bin.log
 max_binlog_size   = 100M
 # binlog_do_db          = include_database_name
 # binlog_ignore_db      = include_database_name
-binlog-format = "MIXED"
+{% if ansible_hostname == "db-master" %}
+binlog-format = row
+{% endif %}
 
 # GTID replication config
 log-slave-updates = On
 gtid-mode = On
 enforce-gtid-consistency = On
+{% if ansible_hostname == "db-slave" %}
+relay-log = relay-log-server
+read-only = ON
+{% endif %}
 
 [mysqld_safe]
 log-error=/var/log/mysql/mysqld.log
