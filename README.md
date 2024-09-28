@@ -1,26 +1,38 @@
 # otus_prof_project
+## Задание
+Необходимо развернуть веб проект, состоящий из нескольких виртуальных машин, и отвечающий следующим требованиям:
+- включен HTTPS
+- настроен Firewall
+- настроен мониторинг со сбором метрик и уведомлениями
+- организован централизованный сбор логов
+- организовано резервное копирование
 
-![Network map](img/map.png)
+## Выполнение
+Стенд для выполнения проект разворачивается в **VirtualBox** с помощью **Vagrant** с использование образа ОС _Ubuntu 22.04_. Создание виртуальных машин инициализируется командой:
+```bash
+vagrant up
+```
+### Описание инфраструктуры
+| Server Name    | Private IP-address | Public IP-address | RAM    | CPU | Description                  |
+|----------------|--------------------|-------------------|--------|-----|------------------------------|
+| **Frontend**   | 192.168.56.101     | 192.168.1.101     | 512 Mb | 1   | Frontend web server          |
+| **Backend-1**  | 192.168.56.102     | -                 | 768 Mb | 1   | Backend web server           |
+| **Backend-2**  | 192.168.56.103     | -                 | 768 Mb | 1   | Backend web server           |
+| **DB_Master**  | 192.168.56.104     | -                 | 1 Gb   | 1   | MySQL Server Master          |
+| **DB_Slave**   | 192.168.56.105     | -                 | 1 Gb   | 1   | MySQL Server Replica         |
+| **Monitoring** | 192.168.56.106     | -                 | 1 Gb   | 2   | Monitoring server. GAP Stack |
+| **Log**        | 192.168.56.107     | -                 | 4 Gb   | 4   | Log Server. ELK Stack        |
 
 - **Frontend** - фронтэнд веб сервер. _Nginx_.  
-- **Backend-1 / Backend - 2** - бэкэнд веб сервера. _Apache_, _WordPress_.  
+- **Backend-1 / Backend - 2** - бекэнд веб сервера. _Apache_, _WordPress_.  
 - **DB-Master** - сервер БД _MySQL_ для WordPress  
 - **DB-Slave** - сервер БД _MySQL_. Репликация с _DB-Master_.  
 - **Monitoring** - сервер мониторинга. _Prometheus_, _Grafana_, _Alertmanager_.  
-- **Log** - сервер сбора логов. _Elasticsearch_, _Logstash_, _Kibana_.  
-
-| Server Name    | Private IP-address | Public IP-address | Description                  |
-|----------------|--------------------|-------------------|------------------------------|
-| **Frontend**   | 192.168.56.101     | 192.168.1.101     | Frontend web server          |
-| **Backend-1**  | 192.168.56.102     | -                 | Backend web server           |
-| **Backend-2**  | 192.168.56.103     | -                 | Backend web server           |
-| **DB_Master**  | 192.168.56.104     | -                 | MySQL Server Master          |
-| **DB_Slave**   | 192.168.56.105     | -                 | MySQL Server Replica         |
-| **Monitoring** | 192.168.56.106     | -                 | Monitoring server. GAP Stack |
-| **Log**        | 192.168.56.107     | -                 | Log Server. ELK Stack        |
+- **Log** - сервер сбора логов. _Elasticsearch_, _Logstash_, _Kibana_.
   
-
-  
+### Карта сети
+![Network map](img/map.png)
+### Правила Firewall
 | Server                        | In Interface  | Protocol | Port       | Source          | Destination     | Action  | State               | Description                |
 |-------------------------------|---------------|----------|------------|-----------------|-----------------|---------|---------------------|----------------------------|
 | **Frontend**                  | lo            | All      | Any        | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Accept traffic to loopback |
@@ -82,6 +94,9 @@
 |                               | enp0s8        | TCP      | 5044       | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Logstash                   |
 |                               | enp0s8        | TCP      | 9100       | 192.168.56.106  | 0.0.0.0/0       | Accept  |                     | Node exporter              |
 |                               | any           | ICMP     | Any        | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Accept ICMP                |
+
+## Ansible
+Настр
 
 
 ### Список ansible тэгов
