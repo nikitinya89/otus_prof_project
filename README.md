@@ -1,6 +1,6 @@
 # otus_prof_project
 
-![Network map](img/network.jpg)
+![Network map](img/map.png)
 
 | Server Name    | Private IP-address | Public IP-address | Description                  |
 |----------------|--------------------|-------------------|------------------------------|
