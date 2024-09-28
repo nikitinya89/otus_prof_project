@@ -2,6 +2,13 @@
 
 ![Network map](img/map.png)
 
+- **Frontend** - фронтэнд веб сервер. _Nginx_.  
+- **Backend-1 / Backend - 2** - бэкэнд веб сервера. _Apache_, _WordPress_.  
+- **DB-Master** - сервер БД _MySQL_ для WordPress  
+- **DB-Slave** - сервер БД _MySQL_. Репликация с _DB-Master_.  
+- **Monitoring** - сервер мониторинга. _Prometheus_, _Grafana_, _Alertmanager_.  
+- **Log** - сервер сбора логов. _Elasticsearch_, _Logstash_, _Kibana_.  
+
 | Server Name    | Private IP-address | Public IP-address | Description                  |
 |----------------|--------------------|-------------------|------------------------------|
 | **Frontend**   | 192.168.56.101     | 192.168.1.101     | Frontend web server          |
