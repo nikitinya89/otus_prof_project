@@ -209,7 +209,6 @@ ansible-playbook project.yml --tags frontend
 При недоступности какого либо из серверов в **Prometheus** отображается **alert**  
 
 ![Prometheus Alert](img/prometheus_alert.jpg) 
-
 **Alertmanager** отсылает уведомление на почту  
 
 ![Email Alert](img/email_alert.jpg)  
