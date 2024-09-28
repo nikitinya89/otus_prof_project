@@ -48,6 +48,15 @@
     jump: ACCEPT
   tags: iptables
 
+- name: Allow HTTP traffic on public interface
+  iptables:
+    chain: INPUT
+    in_interface: enp0s9
+    protocol: tcp
+    destination_port: 80
+    jump: ACCEPT
+  tags: iptables
+
 - name: Allow HTTPS traffic
   iptables:
     chain: INPUT

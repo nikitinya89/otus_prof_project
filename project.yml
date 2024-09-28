@@ -2,6 +2,7 @@
 - hosts: db
   become: true
   gather_facts: true
+  vars_files: inventory/group_vars/all_vault.yml
   roles:
     - role: db
       tags: db
@@ -9,6 +10,7 @@
 - hosts: frontend
   become: true
   gather_facts: false
+  vars_files: inventory/group_vars/all_vault.yml
   roles:
     - role: frontend
       tags: frontend
@@ -16,6 +18,7 @@
 - hosts: backend
   become: true
   gather_facts: true
+  vars_files: inventory/group_vars/all_vault.yml
   roles:
     - role: backend
       tags: backend
@@ -31,6 +34,7 @@
 - hosts: log
   become: true
   gather_facts: false
+  vars_files: inventory/group_vars/all_vault.yml
   roles:
     - role: log
       tags: log
