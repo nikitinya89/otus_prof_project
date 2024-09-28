@@ -29,6 +29,18 @@
     - elk
     - logstash
 
+- name: Copy logstash mysql conf file
+  copy:
+    src: files/logstash-mysql-es.conf
+    dest: /etc/logstash/conf.d/logstash-mysql-es.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart logstash
+  tags:
+    - elk
+    - logstash
+
 - name: Restart logstash
   meta: flush_handlers
   tags:
