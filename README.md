@@ -13,22 +13,23 @@
 vagrant up
 ```
 ### Описание инфраструктуры
-| Server Name    | Private IP-address | Public IP-address | RAM    | CPU | Description                  |
-|----------------|--------------------|-------------------|--------|-----|------------------------------|
-| **Frontend**   | 192.168.56.101     | 192.168.1.101     | 512 Mb | 1   | Frontend web server          |
-| **Backend-1**  | 192.168.56.102     | -                 | 768 Mb | 1   | Backend web server           |
-| **Backend-2**  | 192.168.56.103     | -                 | 768 Mb | 1   | Backend web server           |
-| **DB_Master**  | 192.168.56.104     | -                 | 1 Gb   | 1   | MySQL Server Master          |
-| **DB_Slave**   | 192.168.56.105     | -                 | 1 Gb   | 1   | MySQL Server Replica         |
-| **Monitoring** | 192.168.56.106     | -                 | 1 Gb   | 2   | Monitoring server. GAP Stack |
-| **Log**        | 192.168.56.107     | -                 | 4 Gb   | 4   | Log Server. ELK Stack        |
-
+| Server Name        | Private IP-address | Public IP-address | RAM    | CPU | Description                  |
+|--------------------|--------------------|-------------------|--------|-----|------------------------------|
+| **Frontend**       | 192.168.56.101     | 192.168.1.101     | 512 Mb | 1   | Frontend web server          |
+| **Backend-1**      | 192.168.56.102     | -                 | 768 Mb | 1   | Backend web server           |
+| **Backend-2**      | 192.168.56.103     | -                 | 768 Mb | 1   | Backend web server           |
+| **DB_Master**      | 192.168.56.104     | -                 | 1 Gb   | 1   | MySQL Server Master          |
+| **DB_Slave**       | 192.168.56.105     | -                 | 1 Gb   | 1   | MySQL Server Replica         |
+| **Monitoring**     | 192.168.56.106     | -                 | 1 Gb   | 2   | Monitoring server. GAP Stack |
+| **Log**            | 192.168.56.107     | -                 | 4 Gb   | 4   | Log Server. ELK Stack        |
+| **Ansible Server** | 192.168.56.100     | -                 | 1 Gb   | 1   | Ansible                      |
 - **Frontend** - фронтэнд веб сервер. _Nginx_.  
 - **Backend-1 / Backend - 2** - бекэнд веб сервера. _Apache_, _WordPress_.  
 - **DB-Master** - сервер БД _MySQL_ для WordPress  
 - **DB-Slave** - сервер БД _MySQL_. Репликация с _DB-Master_.  
 - **Monitoring** - сервер мониторинга. _Prometheus_, _Grafana_, _Alertmanager_.  
 - **Log** - сервер сбора логов. _Elasticsearch_, _Logstash_, _Kibana_.
+- **Ansible Server** - ansible сервер для автоматизации настройки ирнфраструктуры.
   
 ### Карта сети
 ![Network map](img/map.png)
@@ -96,7 +97,12 @@ vagrant up
 |                               | any           | ICMP     | Any        | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Accept ICMP                |
 
 ## Ansible
-Настр
+Настройка серверов выполняется с помощью **Ansible**. Для выполнения настройки необходимо запустить плэйбук:
+```bash
+ansible-playbook project.yml
+```
+### Структура проекта
+
 
 
 ### Список ansible тэгов
