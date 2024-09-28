@@ -102,8 +102,22 @@ vagrant up
 ansible-playbook project.yml
 ```
 ### Структура проекта
-
-
+```bash
+├── ansible.cfg  
+├── files  
+├── inventory  
+│   ├── group_vars  
+│   ├── hosts.ini  
+│   └── host_vars  
+├── project.yml  
+└── roles  
+    ├── backend  
+    ├── db  
+    ├── frontend  
+    ├── log  
+    └── monitoring  
+```
+- 
 
 ### Список ansible тэгов
 - **frontend** - полная настройка _frontend_ сервера
