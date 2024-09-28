@@ -191,3 +191,33 @@ ansible-playbook project.yml --tags frontend
 - **filebeat** - установка _filebeat_
 - **ssl** - работа с _tls_ сертификатами
 - **iptables** - настройка правил _iptables_
+## Демонстрация
+В результате выполнения playbook мы получим настроенный на двух бекэнд серверах **CMS Wordpress**, использующий БД **MySQL**, фронтэнд сервер **Nginx**, осуществляющий балансировку нагрузки, сервер мониторинга **Prometheus**+**Grafana**, собирающий метрики и рассылающий уведомления, а также сервер логирования **ELK**, централизовано собирающий логи.  
+  
+Перейдя на главную страницу проекта по внешнему адресу фронтэнд сервера, видно, что запрос успешно проксируется на первый бекэнд. Имя сервера отражено на странице.  
+  
+![Frontend to Backend-1](img/frontend_1.jpg)  
+
+При обновление страницы имя сервера меняется, что подтверждает, что балансировка работает  
+  
+![Frontend to Backend-2](img/frontend_2.jpg)
+
+Сервер **Prometheus** собирает метрики **node_exporter**, что визуально отображается в **Grafana**
+
+![Grafana Dashboard](img/grafana.jpg)  
+
+При недоступности какого либо из серверов в **Prometheus** отображается **alert**  
+
+![Prometheus Alert](img/prometheus_alert.jpg) 
+
+**Alertmanager** отсылает уведомление на почту  
+
+![Email Alert](img/email_alert.jpg)  
+
+**ELK** сервер собирает логи  
+
+![Kibana Logs](img/kibana_logs.jpg) 
+
+Из полученных данных настроен **dashboard**  
+
+![Kibana Dashboard](img/kibana_dashboard.jpg) 
