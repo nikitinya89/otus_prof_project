@@ -1,5 +1,7 @@
 # otus_prof_project
 
+![Network map](img/network.jpg)
+
 | Server Name    | Private IP-address | Public IP-address | Description                  |
 |----------------|--------------------|-------------------|------------------------------|
 | **Frontend**   | 192.168.56.101     | 192.168.1.101     | Frontend web server          |
