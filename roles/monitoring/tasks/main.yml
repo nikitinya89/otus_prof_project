@@ -17,7 +17,9 @@
     group: monitoring
     mode: 0750
   tags:
-    - ssl
+   - prometheus
+   - grafana
+   - ssl
 
 - name: Copy certificates
   copy:
@@ -29,7 +31,10 @@
   with_items:
     - "files/certificates/{{ monitoring_srv }}/fullchain.pem"
     - "files/certificates/{{ monitoring_srv }}/privkey.pem"
-  tags: ssl
+  tags:
+   - prometheus
+   - grafana
+   - ssl
 
 - name: Configure prometheus
   import_tasks: prometheus.yml

@@ -40,6 +40,16 @@
     mode: 0644
   tags: nginx_exporter
 
+- name: Add nginx exporter config file
+  copy:
+    src: files/status.conf
+    dest: /etc/nginx/sites-available/status.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Reload nginx
+  tags: nginx_exporter
+
 - name: Start node exporter service
   systemd:
     name: nginx_exporter

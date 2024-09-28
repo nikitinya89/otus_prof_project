@@ -10,12 +10,6 @@
     update_cache: true
   tags: mysql
 
-- name: Restart mysql service
-  systemd:
-    name: mysql
-    state: started
-    enabled: true
-
 - name: Copy mysqld config file
   template:
     src: templates/mysqld.cnf.j2
@@ -39,6 +33,13 @@
 - name: Restart mysql
   meta: flush_handlers
   tags: mysql
+
+- name: Start mysql service
+  systemd:
+    name: mysql
+    state: started
+    enabled: true
+  tasg: mysql
 
 - name: Update mysql root password for all root accounts
   mysql_user:
@@ -121,18 +122,24 @@
     - mysql
     - replication
 
-- name: 
+- name: Fetch dump from master
   fetch:
     src: /tmp/db.sql
     dest: files/db_master.sql
     flat: true
   when: 'ansible_hostname == "db-master"'
+  tags:
+    - mysql
+    - replication
 
 - name: Copy dump to slave
   copy:
     src: files/db_master.sql
     dest: /home/vagrant/db.sql
   when: 'ansible_hostname == "db-slave"'
+  tags:
+    - mysql
+    - replication
 
 - name: Loading mysql dump on slave
   mysql_db:

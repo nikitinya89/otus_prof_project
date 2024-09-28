@@ -74,18 +74,6 @@
   notify: Reload nginx
   tags: nginx
 
-- name: Add nginx exporter config file
-  copy:
-    src: files/status.conf
-    dest: /etc/nginx/sites-available/status.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: Reload nginx
-  tags:
-    - nginx
-    - nginx_exporter
-
 - name: Enable sites
   file:
     src: "/etc/nginx/sites-available/{{ item }}"
