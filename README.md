@@ -143,23 +143,23 @@ ansible-playbook project.yml
 - настройка _iptables_ 
 #### db
 Настройка БД серверов **DB-Master** и **DB-Slave**: 
-- установка и настройка MySQL
+- установка и настройка _MySQL_
 - восттановление сохраненного дампа баз данных
-- настройка репликации MySQL
+- настройка репликации _MySQL_
 - установка _node_exporter_
 - установка _mysqld_exporter_
 - установка _filebeat_
 - настройка _iptables_ 
 #### monitoring
 Настройка сервера мониторинга **Monitoring**:
-- установка и настройка Prometheus
-- установка и настройка Grafana
-- установка и настройка Alertmanager
+- установка и настройка _Prometheus_
+- установка и настройка _Grafana_
+- установка и настройка _Alertmanager_
 - установка _node_exporter_
 - настройка _iptables_
 #### log
 Настройка сервера логирования **Log**:
-- установка и настройка стека ELK
+- установка и настройка стека _ELK_
 - установка _node_exporter_
 - настройка _iptables_
 ### Ansible tags
@@ -191,17 +191,3 @@ ansible-playbook project.yml --tags frontend
 - **filebeat** - установка _filebeat_
 - **ssl** - работа с _tls_ сертификатами
 - **iptables** - настройка правил _iptables_
-
-
-
-
-
-
-
-
-
-
-
-
-
-
