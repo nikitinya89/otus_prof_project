@@ -26,11 +26,21 @@
   notify: Restart mysql
   tags: mysql
 
+- name: Copy mysqld config file2
+  copy:
+    src: files/mysqldump.cnf
+    dest: /etc/mysql/mysql.conf.d/mysqlddump.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart mysql
+  tags: mysql
+
 - name: Restart mysql
   meta: flush_handlers
   tags: mysql
 
-- name: update mysql root password for all root accounts
+- name: Update mysql root password for all root accounts
   mysql_user:
     name: root
     password: "{{ db_root_password }}"
@@ -64,11 +74,20 @@
   copy:
     src: files/db_new.sql
     dest: /home/vagrant/db.sql
-#  when: 'ansible_hostname == "db-master"'
+  when: 'ansible_hostname == "db-master"'
   tags:
     - mysql
     - replication
-    - test
+
+- name: Check if database exists
+  mysql_query:
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    query: "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{{ db_name }}';"
+  register: db_check
+  tags:
+    - mysql
+    - replication
 
 - name: Loading mysql dump
   mysql_db:
@@ -77,17 +96,55 @@
     name: all
     state: import
     target: /home/vagrant/db.sql
-#  when: 'ansible_hostname == "db-master"'
+  when: db_check.rowcount[0] == 0 and ansible_hostname == "db-master"
+#  when: (db_check.stdout | length == 0 or db_check.stdout is not defined) and ansible_hostname == "db-master"
+#  when: db_check.stdout | length == 0 and ansible_hostname == "db-master"
   tags:
     - mysql
     - replication
-    - test
 
 #- name: 
 #  shell: mysqldump --all-databases --add-drop-table --create-options --disable-keys \
 #                   --extended-insert --single-transaction --quick --events --routines \
 #                   --set-gtid-purged=OFF --triggers --skip-lock-tables --flush-privileges \
 #                   -u root -p'P@$$w0rd' > /home/vagrant/db.sql
+
+- name: Create dump on master
+  mysql_db:
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: dump
+    name: all
+    target: /tmp/db.sql
+  when: 'ansible_hostname == "db-master"'
+  tags:
+    - mysql
+    - replication
+
+- name: 
+  fetch:
+    src: /tmp/db.sql
+    dest: files/db_master.sql
+    flat: true
+  when: 'ansible_hostname == "db-master"'
+
+- name: Copy dump to slave
+  copy:
+    src: files/db_master.sql
+    dest: /home/vagrant/db.sql
+  when: 'ansible_hostname == "db-slave"'
+
+- name: Loading mysql dump on slave
+  mysql_db:
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    name: all
+    state: import
+    target: /home/vagrant/db.sql
+  when: 'ansible_hostname == "db-slave"'
+  tags:
+    - mysql
+    - replication
 
 - name: Create user for replication
   mysql_user:

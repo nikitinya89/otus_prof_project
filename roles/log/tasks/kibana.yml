@@ -31,3 +31,47 @@
   tags:
     - elk
     - kibana
+
+- name: Check Kibana status until it returns 200
+  uri:
+    url: "http://localhost:5601/api/status"
+    method: GET
+    headers:
+      kbn-xsrf: "true"
+    status_code: 200
+    return_content: no
+  register: kibana_status
+  until: kibana_status.status == 200
+  retries: 30
+  delay: 10
+  tags:
+    - elk
+    - kibana
+
+#- name: Import saved objects into Kibana
+#  delegate_to: localhost
+#  shell: |
+#    curl -X POST "{{ log_srv }}:5601/api/saved_objects/_import" \
+#    -H "kbn-xsrf: true" \
+#    --form file=@roles/log/files/kibana.ndjson
+#  tags:
+#    - elk
+#    - kibana
+
+- name: Import Kibana saved objects
+  uri:
+    url: "http://{{ log_srv }}:5601/api/saved_objects/_import"
+    method: POST
+    headers:
+      kbn-xsrf: "true"
+    body_format: form-multipart
+    body:
+      file:
+        src: files/kibana.ndjson
+        filename: kibana.ndjson
+    status_code: 200, 201
+  delegate_to: localhost
+  when: kibana_status.status == 200
+  tags:
+    - elk
+    - kibana
