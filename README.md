@@ -1,6 +1,17 @@
 # otus_prof_project
 
+| Server Name    | Private IP-address | Public IP-address | Description                  |
+|----------------|--------------------|-------------------|------------------------------|
+| **Frontend**   | 192.168.56.101     | 192.168.1.101     | Frontend web server          |
+| **Backend-1**  | 192.168.56.102     | -                 | Backend web server           |
+| **Backend-2**  | 192.168.56.103     | -                 | Backend web server           |
+| **DB_Master**  | 192.168.56.104     | -                 | MySQL Server Master          |
+| **DB_Slave**   | 192.168.56.105     | -                 | MySQL Server Replica         |
+| **Monitoring** | 192.168.56.106     | -                 | Monitoring server. GAP stack |
+| **Log**        | 192.168.56.107     | -                 | Log Server. ELK Stack        |
+  
 
+  
 | Server                        | In Interface  | Protocol | Port       | Source          | Destination     | Action  | State               | Description                |
 |-------------------------------|---------------|----------|------------|-----------------|-----------------|---------|---------------------|----------------------------|
 | **Frontend**                  | lo            | All      | Any        | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Accept traffic to loopback |
