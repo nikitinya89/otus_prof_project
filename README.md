@@ -7,7 +7,7 @@
 | **Backend-2**  | 192.168.56.103     | -                 | Backend web server           |
 | **DB_Master**  | 192.168.56.104     | -                 | MySQL Server Master          |
 | **DB_Slave**   | 192.168.56.105     | -                 | MySQL Server Replica         |
-| **Monitoring** | 192.168.56.106     | -                 | Monitoring server. GAP stack |
+| **Monitoring** | 192.168.56.106     | -                 | Monitoring server. GAP Stack |
 | **Log**        | 192.168.56.107     | -                 | Log Server. ELK Stack        |
   
 
