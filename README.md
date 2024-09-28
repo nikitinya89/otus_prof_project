@@ -84,15 +84,30 @@
 |                               | any           | ICMP     | Any        | 0.0.0.0/0       | 0.0.0.0/0       | Accept  |                     | Accept ICMP                |
 
 
-
-
-
-
-
-
-
-
-
+### Список ansible тэгов
+- **frontend** - полная настройка _frontend_ сервера
+- **backend** - полная настройка _backend_ серверов
+- **db** - полная настройка серверов _БД_
+- **monitoring** - полная настройка сервера _мониторинга_
+- **log** - полная настройка сервера _логирования_
+- **nginx** - установка и настройка _nginx_
+- **apache** - установка и настройка _apache2_
+- **wordpress** - установка и настройка _WordPress_
+- **mysql** - установка и настройка _MySQL_
+- **replication** - настройка репликации MySQL
+- **prometheus** - установка и настройка _Prometheus_
+- **grafana** - установка и настройка _Grafana_
+- **alertmanager** - установка и настройка _Alertmanager_
+- **elk** - установка и настройка стека _ELK_
+- **elasticsearch** - установка и настройка Elasticsearch
+- **kibana** - установка и настройка Kibana
+- **logstash** - установка и настройка Logstash
+- **node_exporter** - установка _node_exporter_
+- **nginx_exporter** - установка _nginx_exporter_
+- **mysqld_exporter** - установка _mysqld_exporter_
+- **filebeat** - установка _filebeat_
+- **ssl** - работа с _tls_ сертификатами
+- **iptables** - настройка правил _iptables_
 
 
 
