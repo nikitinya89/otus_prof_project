@@ -105,10 +105,11 @@ ansible-playbook project.yml
 ```bash
 ├── ansible.cfg  
 ├── files  
-├── inventory  
-│   ├── group_vars  
-│   ├── hosts.ini  
-│   └── host_vars  
+├── inventory
+│   ├── group_vars
+│   │   ├── all_vault.yml
+│   │   └── all.yml
+│   └── hosts.ini
 ├── project.yml  
 └── roles  
     ├── backend  
@@ -117,9 +118,21 @@ ansible-playbook project.yml
     ├── log  
     └── monitoring  
 ```
-- 
+- **ansible.cfg** - конфигурационный файл _ansible_
+- **hosts.ini** - реестр серверов
+- **all.yml** - список переменных, используемых в проекте
+- **all_vault.yml** - список переменных, зашифрованных с использованием _ansible-vault_
+- **project.yml** - основной _playbook_ проекта
+- **roles** - каталог с ролями, подключаемыми в _playbook_
 
-### Список ansible тэгов
+Для удобства восприятия в проект используются роли, отвечающие за настройку определенной группы серверов. Задания внутри ролей в свою очередь также разбиты на части и подключаются в playbook с использованием модуля _import_tasks_.
+
+### Ansible tags
+К каждой задаче в проекте добавлены тэги. Тэги необходимы для выполнения только определнных задач из playbook. Например, запустить настройку _frontend_ сервера можно с использованием тэга _frontend_:
+```bash
+ansible-playbook project.yml --tags frontend
+```
+#### Список используемых в playbook тэгов
 - **frontend** - полная настройка _frontend_ сервера
 - **backend** - полная настройка _backend_ серверов
 - **db** - полная настройка серверов _БД_
