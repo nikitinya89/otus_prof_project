@@ -1,0 +1,7 @@
+[Unit]
+Description=MySQL Backup
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/bin/bash -c '/usr/bin/mysqldump --all-databases --add-drop-table --create-options --disable-keys --extended-insert --single-transaction --quick --events --routines --set-gtid-purged=ON --source-data=2 --triggers --skip-lock-tables --flush-privileges > /home/vagrant/mysql_backup/db.sql'

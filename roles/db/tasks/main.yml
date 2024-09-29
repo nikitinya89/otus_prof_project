@@ -39,7 +39,7 @@
     name: mysql
     state: started
     enabled: true
-  tasg: mysql
+  tags: mysql
 
 - name: Update mysql root password for all root accounts
   mysql_user:
@@ -213,6 +213,9 @@
   tags:
     - mysql
     - replication
+
+- name: Configure mysql backup on slave
+  import_tasks: mysql_backup.yml
 
 - name: Configure node exporter
   import_tasks: node_exporter.yml
