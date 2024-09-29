@@ -178,6 +178,7 @@ ansible-playbook project.yml --tags frontend
 - **wordpress** - установка и настройка _WordPress_
 - **mysql** - установка и настройка _MySQL_
 - **replication** - настройка репликации MySQL
+- **mysql_backup** - настройка резервного копирования MySQL на реплике
 - **prometheus** - установка и настройка _Prometheus_
 - **grafana** - установка и настройка _Grafana_
 - **alertmanager** - установка и настройка _Alertmanager_
