@@ -74,16 +74,13 @@
   notify: Reload nginx
   tags: nginx
 
-- name: Enable sites
+- name: Enable site
   file:
-    src: "/etc/nginx/sites-available/{{ item }}"
-    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    src: /etc/nginx/sites-available/frontend.conf
+    dest: /etc/nginx/sites-enabled/frontend.conf
     owner: root
     group: root
     state: link
-  with_items:
-    - frontend.conf
-    - status.conf
   notify: Reload nginx
   tags: nginx
 

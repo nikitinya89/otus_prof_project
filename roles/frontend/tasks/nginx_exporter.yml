@@ -50,6 +50,20 @@
   notify: Reload nginx
   tags: nginx_exporter
 
+- name: Enable nginx_exporter site
+  file:
+    src: /etc/nginx/sites-available/status.conf
+    dest: /etc/nginx/sites-enabled/status.conf
+    owner: root
+    group: root
+    state: link
+  notify: Reload nginx
+  tags: nginx_exporter
+
+- name: Reload nginx
+  meta: flush_handlers
+  tags: nginx_exporter
+
 - name: Start node exporter service
   systemd:
     name: nginx_exporter

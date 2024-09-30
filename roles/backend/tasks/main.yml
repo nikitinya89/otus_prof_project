@@ -15,13 +15,6 @@
     update_cache: true
   tags: apache
 
-- name: Restart apache service
-  systemd:
-    name: apache2
-    state: restarted
-    enabled: true
-  tags: apache
-
 - name: Create folder for ssl
   file:
     path: "/etc/apache2/ssl/{{ ansible_hostname }}.{{ domain_name }}"
@@ -105,6 +98,13 @@
 
 - name: Reload apache
   meta: flush_handlers
+  tags: apache
+
+- name: Start apache service
+  systemd:
+    name: apache2
+    state: started
+    enabled: true
   tags: apache
 
 - name: Configure wordpress
